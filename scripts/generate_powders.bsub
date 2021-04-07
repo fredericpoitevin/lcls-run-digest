@@ -1,0 +1,24 @@
+#!/bin/bash
+
+run_start=221
+run_end=235
+run_current=$run_start
+
+while [ $run_current -le $run_end ]
+do
+  if [ $run_current -lt 10 ]; then
+    run_id="00$run_current"
+  elif [ $run_current -lt 100 ]; then
+    run_id="0$run_current"
+  else
+    run_id=$run_current
+  fi
+  #echo "
+  if [ ! -f /reg/d/psdm/cxi/cxilv4418/scratch/fpoitevi/psocake/r0${run_id}/cxilv4418_0${run_id}_jungfrau4M_sum.npy ]; then
+    bsub -q psanaq -n 24 -o /reg/d/psdm/cxi/cxilv4418/scratch/fpoitevi/psocake/r0${run_id}/.%J.log mpirun generatePowder exp=cxilv4418:run=${run_current} -d jungfrau4M -o /reg/d/psdm/cxi/cxilv4418/scratch/fpoitevi/psocake/r0${run_id}
+  else
+    echo "cxilv4418_0${run_id}_jungfrau4M_sum.npy already exists"
+  fi
+  #"
+  run_current=$[$run_current+1]
+done
