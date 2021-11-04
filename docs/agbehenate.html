@@ -41,7 +41,7 @@ function draw() {
          var r2 = ry2 + rx * rx;
 
          var color = 0;
-         if (ry2 < 10 ) {
+         if (r2 < 10 ) {
             color = 255;
          }
          if (color < 0) color = 0;
@@ -54,7 +54,7 @@ function draw() {
 
          if (s2 > 0) {
             var resol = Math.sqrt(1.0 / s2);
-            if (Math.abs(resol - 0.3) < 0.02) {
+            if (Math.abs(resol - 10) < 0.02) {
                img_data.data[idx    ] = 255;
                img_data.data[idx + 1] = 0;
                img_data.data[idx + 2] = 0;
