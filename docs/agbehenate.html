@@ -62,14 +62,18 @@ function draw() {
    var apix = parseFloat(document.getElementById("pixsize").value);
    var detsize = parseFloat(document.getElementById("detsize").value);
    var energy = parseFloat(document.getElementById("energy").value);
-
-   var wavelength = 1.2398 / energy
-
-   var canvas = document.getElementById("rings");
-   var ctx = canvas.getContext("2d");
+   var wavelength = 1.2398 / energy; // in nm
 
    var nx = detsize, ny = detsize;
+
+   var canvas = document.getElementById("rings");
    canvas.width = canvas.height = detsize;
+
+   var ctx = canvas.getContext("2d");
+   ctx.font = "30px Arial";
+   ctx.textAlign = "right";
+   ctx.fillStyle = "white";
+
 
    var img_data = ctx.createImageData(ny, nx);
 
@@ -93,7 +97,7 @@ function draw() {
 
          var color = 0;
          if (d < 5 ) {
-            color = 255;
+            color = 180;
          }
          if (color < 0) color = 0;
          if (color > 255) color = 255;
@@ -111,10 +115,26 @@ function draw() {
 
                 if (Math.abs(resol - iring) < 1) {
                     img_data.data[idx] = 255;
-                    img_data.data[idx + 1] = 0;
+                    img_data.data[idx + 1] = 255;
                     img_data.data[idx + 2] = 0;
                 }
             }
+            ilowres = 5.0 / apix;
+            if (Math.abs(resol - ilowres) < 2) {
+                img_data.data[idx] = 255;
+                img_data.data[idx + 1] = 255;
+                img_data.data[idx + 2] = 255;
+            }
+
+            ihires = nx/2;
+            if (Math.abs(resol - ihires) < 2) {
+                img_data.data[idx] = 255;
+                img_data.data[idx + 1] = 255;
+                img_data.data[idx + 2] = 255;
+            }
+
+            lowres = 2.0 * Math.PI * 2.0 * Math.sin(Math.atan(5.0 / detdist) / 2.0) / wavelength / 10.
+            hires = 2.0 * Math.PI * 2.0 * Math.sin(Math.atan(ihires * apix / detdist) / 2.0) / wavelength / 10.
          }
 
          idx += 4;
@@ -122,6 +142,8 @@ function draw() {
    }
 
    ctx.putImageData(img_data, 0, 0);
+   ctx.fillText(Number(lowres.toFixed(2))+' A-1 ', canvas.width/2 - ilowres, canvas.height/2);
+   ctx.fillText(Number(hires.toFixed(2))+' A-1 ', canvas.width/2 + ihires, canvas.height/2);
 }
 </script>
 
