@@ -16,52 +16,33 @@ function electron_wavelength(U) { // U in [V], returns in [Angstrom]
 }
 
 function draw() {
-   var apix = parseFloat(document.getElementById("angpix").value);
-   var boxsize = parseInt(document.getElementById("boxsize").value);
-   var defocus = parseFloat(document.getElementById("defocus").value); // (U + V) / 2
-   var astigmatism = parseFloat(document.getElementById("astigmatism").value); // (U - V) / 2
-   var astig_angle = parseFloat(document.getElementById("angle").value) / 180.0 * Math.PI;
-   var cs = 1E7 * parseFloat(document.getElementById("cs").value);
-   var ht = 1E3 * parseFloat(document.getElementById("energy").value);
-   var ac = parseFloat(document.getElementById("ac").value);
-   var phase_shift = parseFloat(document.getElementById("phase").value) / 180.0 * Math.PI;
-   var ring1 = parseFloat(document.getElementById("ring1").value);
+   var detdist = parseFloat(document.getElementById("detdist").value);
+   var detsize = 1000;
+   var apix = 1;
 
-   var power_spectrum = false;
-
-   var canvas = document.getElementById("ctf2d");
+   var canvas = document.getElementById("rings");
    var ctx = canvas.getContext("2d");
 
-   var nx = boxsize, ny = boxsize;
-   canvas.width = canvas.height = boxsize;
-
-   var wavelength = electron_wavelength(ht);
-   var wavelength3 = wavelength * wavelength *wavelength;
-   var pc = Math.sqrt(1 - ac * ac);
-   var K1 = Math.PI / 2 * cs * wavelength3;
-   var K2 = Math.PI * wavelength;
+   var nx = detsize, ny = detsize;
+   canvas.width = canvas.height = detsize;
 
    var img_data = ctx.createImageData(ny, nx);
 
    var idx = 0;
    for (var i = 0; i < ny; i++) {
       var sy = (i - ny / 2.0) / ny / apix;
+      var ry = (i - ny / 2.0) * apix;
       var sy2 = sy * sy;
+      var ry2 = ry * ry;
       for (var j = 0; j < nx; j++) {
          var sx = (j - nx / 2) / nx / apix;
-         var angle = Math.atan2(sy, sx) - astig_angle;
-         var local_defocus = defocus + astigmatism * Math.cos(2 * angle);
-
+         var rx = (j - nx / 2) * apix;
          var s2 = sy2 + sx * sx;
-         var gamma = K1 * s2 * s2 - K2 * s2 * local_defocus - phase_shift;
-         var ctf = -pc * Math.sin(gamma) + ac * Math.cos(gamma);
+         var r2 = ry2 + rx * rx;
 
          var color = 0;
-         if (power_spectrum) {
-            ctf = ctf * ctf;
-            color = ctf * 256;
-         } else {
-            color = (ctf + 1) * 128;
+         if (ry2 < 10 ) {
+            color = 255;
          }
          if (color < 0) color = 0;
          if (color > 255) color = 255;
@@ -73,7 +54,7 @@ function draw() {
 
          if (s2 > 0) {
             var resol = Math.sqrt(1.0 / s2);
-            if (Math.abs(resol - ring1) < 0.02) {
+            if (Math.abs(resol - 0.3) < 0.02) {
                img_data.data[idx    ] = 255;
                img_data.data[idx + 1] = 0;
                img_data.data[idx + 2] = 0;
@@ -91,23 +72,14 @@ function draw() {
 
 <body>
 
-<h1>CTF calculator</h1>
-<p>This interactive page allows you to calculate the contrast transfer function. The CTF model is compatible with that of RELION.</p>
+<h1>Silver Behenate Rings Simulator</h1>
+<p>This interactive page allows you to simulate Silver Behenate rings as they would appear on an LCLS detector.</p>
 
 <form>
-<label>Box size (in pix): <input id="boxsize" min="2" max="1024" value="300"></label><br>
-<label>Pixel size (in &#8491; / pix): <input id="angpix" min="0" max="3" value="1.0"></label><br>
-<label>Defocus ((U+V)/2 in &#8491;): <input id="defocus" min="0" max="100000" value="10000"></label><br>
-<label>Astigmatism ((U-V)/2 in &#8491;): <input id="astigmatism" min="0" max="2000" value="200"></label><br>
-<label>Astigmatism angle (in deg): <input id="angle" min="0" max="360" value="90"></label><br>
-<label>Cs (in mm): <input id="cs" min="0" max="4" step="0.01" value="2.7"></label><br>
-<label>Energy (in kV): <input id="energy" min="0" max="1000" step="10" value="300"></label><br>
-<label>Amplitude contrast: <input id="ac" min="0" max="1" value="0.1"></label><br>
-<label>Phase shift (in deg): <input id="phase" min="-360" max="360" step="1" value="0"></label><br>
-<label>Draw ring at (in &#8491;): <input id="ring1" min="999" max="0.5" value="2.5"></label><br>
+    <label>Detector distance (in mm): <input id="detdist" min="1" max="300" value="60"></label><br>
 <button type="button" value="Draw" onClick="draw()">Draw</button>
 </form>
-<canvas id="ctf2d" width=512 height=512 style="border:1px solid black">
+<canvas id="rings" width=512 height=512 style="border:1px solid black">
 </canvas>
 
 <footer>
