@@ -1,16 +1,69 @@
 <!DOCTYPE html>
 
 <html>
+<head>
+<style>
 
-<header>
+.slidecontainer {
+  width: 100%; /* Width of the outside container */
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 10%;
+  height: 10px;
+  border-radius: 1px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+  opacity: 1; /* Fully shown on mouse-over */
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+</style>
+
+</head>
+
 <title>Silver Behenate Diffraction Simulator</title>
+
+<body>
+
 <script type="text/javascript">
+
+function sliderChange(val, output_id) {
+    document.getElementById(output_id).innerHTML = val;
+}
 
 function draw() {
    var detdist = parseFloat(document.getElementById("detdist").value);
-   var apix = parseFloat(document.getElementById("apix").value);
+   var apix = parseFloat(document.getElementById("pixsize").value);
    var detsize = parseFloat(document.getElementById("detsize").value);
-   var wavelength = parseFloat(document.getElementById("wavelength").value);
+   var energy = parseFloat(document.getElementById("energy").value);
+
+   var wavelength = 1.2398 / energy
 
    var canvas = document.getElementById("rings");
    var ctx = canvas.getContext("2d");
@@ -55,6 +108,7 @@ function draw() {
             for (var k = 1; k < 14; k++) {
                 ds = k * 0.0171;
                 iring = detdist * Math.tan(2.0 * Math.asin(ds * wavelength * 10. / 2.0)) / apix;
+
                 if (Math.abs(resol - iring) < 1) {
                     img_data.data[idx] = 255;
                     img_data.data[idx + 1] = 0;
@@ -70,7 +124,7 @@ function draw() {
    ctx.putImageData(img_data, 0, 0);
 }
 </script>
-</header>
+
 
 <body>
 
@@ -78,11 +132,26 @@ function draw() {
 <p>This interactive page allows you to simulate Silver Behenate rings as they would appear on an LCLS detector.</p>
 
 <form>
-    <label>Detector distance (in mm): <input id="detdist" min="1" max="300" value="60"></label><br>
-    <label>Pixel size (in mm): <input id="apix" min="0.01" max="10" value="0.1"></label><br>
-    <label>Detector size (in pixels): <input id="detsize" min="100" max="2000" value="1000" step="1"></label><br>
-    <label>Wavelength (in nm): <input id="wavelength" min="0.05" max="10" value="0.15"></label><br>
-<button type="button" value="Draw" onClick="draw()">Draw</button>
+    <div class="slidecontainer">
+        Detector distance:
+        <input type="range" id="detdist" min="1" max="300" value="60" class="slider" oninput="sliderChange(this.value, 'detdistvalue')" onchange="draw()">
+        <output id="detdistvalue"></output> (mm)
+    </div><br>
+    <div class="slidecontainer">
+        Pixel size:
+        <input type="range" id="pixsize" min="0.05" max="0.2" value="0.075" step="0.005"class="slider" oninput="sliderChange(this.value, 'pixsizevalue')" onchange="draw()">
+        <output id="pixsizevalue"></output> (mm)
+    </div><br>
+    <div class="slidecontainer">
+        Detector size:
+        <input type="range" id="detsize" min="100" max="2500" value="2100" step="1"class="slider" oninput="sliderChange(this.value, 'detsizevalue')" onchange="draw()">
+        <output id="detsizevalue"></output> (pixels)
+     </div><br>
+    <div class="slidecontainer">
+        Wavelength:
+        <input type="range" id="energy" min="3" max="12" value="7" step="0.5"class="slider" oninput="sliderChange(this.value, 'energyvalue')" onchange="draw()">
+        <output id="energyvalue"></output> (keV)
+     </div><br>
 </form>
 <canvas id="rings" width=512 height=512 style="border:1px solid black">
 </canvas>
